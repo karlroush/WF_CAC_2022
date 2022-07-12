@@ -1,5 +1,6 @@
 '''
 Building a binary classifier on one label
+TEST ONLY
 '''
 
 import pandas as pd
