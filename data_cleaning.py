@@ -46,7 +46,7 @@ def cleanData(dataframe):
 if __name__ == '__main__':
     start_time = time.time()
     #%% ========== LOAD DATA ========== %%# 
-    #first pull raw training data
+    #first pull raw data
     df= loadData('CAC+2022_Training+Data+Set+New.xlsx')
     
     #%% ========== Checking which fields to remove ========== %%# 
