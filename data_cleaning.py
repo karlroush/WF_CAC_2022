@@ -67,6 +67,7 @@ if __name__ == '__main__':
 
     #%% ========== Cleaning data and removing cols ========== %%# 
     c_df= cleanData(df) #see report for rationale
+    c_df= c_df.fillna(0)
     c_df.to_excel('./cleaned_data/clean_training_data.xlsx', index= False)  
     
     print("\n--- %s seconds ---" % (time.time() - start_time))
