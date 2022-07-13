@@ -39,7 +39,7 @@ if not(exists('./cleaned_data/clean_test_data.xlsx')):
     
 #load the cleaned data
 df = pd.read_excel('./cleaned_data/clean_training_data.xlsx')
-test_df= pd.read_excel('./cleaned_data/clean_test_data.xlsx')
+eval_df= pd.read_excel('./cleaned_data/clean_test_data.xlsx')
 
 d= {'Communication Services': 0, 'Education': 1, 'Entertainment': 2,
     'Finance': 3, 'Health and Community Services': 4, 'Property and Business Services': 5,
@@ -50,7 +50,7 @@ df['target'] = df['Category'].map(d) #create numeric target based on category
 df= df.fillna(-1)
 
 #apply same logic to test data
-test_df=test_df.fillna(-1)
+eval_df=eval_df.fillna(-1)
 
 
 #%% ==================== COMPUTE CLASS WEIGHTS (IMBALANCED) ==================== %%#  
@@ -71,12 +71,13 @@ print(weights)
 train, test= train_test_split(df.loc[:,df.columns != 'Category'], test_size=0.2) 
 target= 'target' #identify target (the category converted to number)
 
+# note that imbalanced flag is set to false since the weights are already calculated
 m, feats, trainm, testm= Auto_ViML(train, target, test, 
                                    sample_submission='', scoring_parameter='',
                                    KMeans_Featurizer=False, hyper_param= 'RS',
                                    feature_reduction=True,
                                    Boosting_Flag='CatBoost', Binning_Flag=False,
-                                   Add_Poly=0, Stacking_Flag= False, Imbalanced_Flag= True,
+                                   Add_Poly=0, Stacking_Flag= False, Imbalanced_Flag= False,
                                    verbose= 2)
 
 
@@ -85,28 +86,31 @@ m.save_model('model', format= 'cbm') #save model
 # plot_confusion_matrix(test[target].values, m.predict(testm[feats]))
 
 #Pre-process test data
-test_df= test_df[feats] #pull out features the model uses
-test_df= test_df.fillna(-1) #replace and NaN
-test_df['merchant_cat_code'] = test_df['merchant_cat_code'].astype(int)
-test_df['amt'] = test_df['amt'].astype(int)
+eval_df= eval_df[feats] #pull out features the model uses
+eval_df= eval_df.fillna(-1) #replace and NaN
+eval_df['merchant_cat_code'] = eval_df['merchant_cat_code'].astype(int)
+eval_df['amt'] = eval_df['amt'].astype(int)
 
 #make predictions
-preds= m.predict(test_df)
+preds= m.predict(eval_df)
 
 
 #%% ==================== SAVE PREDICTIONS IN DESIRED FORMAT ==================== %%#  
 # add predictions to test data 
 final_data= pd.read_excel('./provided_data/CAC+2022_Test+Data+Set+New.xlsx')
-final_data['target']= preds
+final_data['Category']= preds
 
 # Map the numbers back to category labels
-d= dict([(value, key) for key, value in d.items()])
-print(d)
-final_data['Category'] = final_data['target'].map(d) 
-# final_data = final_data.drop(columns=['target'])
+# # final_data['Category'] = final_data['Category'].astype(str)
+d2= dict([(value, key) for key, value in d.items()])
+# print(d2)
+
+final_data['Category'] = final_data['Category'].replace(d2)
+# print(final_data['Category'])
+# print(list(final_data))
 
 # save predictions on test data to file
-# final_data.to_excel('categorized_test_data.xlsx', index= False)
+final_data.to_excel('categorized_eval_data.xlsx', index= False)
 
 
 #%% ==================== COMPARE TO UNMODIFIED CATBOOST MODEL ==================== %%#  
@@ -145,7 +149,7 @@ if compare:
     
     # Get predicted classes
     preds_class = model.predict(eval_dataset)
-    preds2= model.predict(test_df)
+    preds2= model.predict(eval_df)
     
     # Compare predictions with novel approach
     print((sum(preds==preds2)/len(preds))[0])
