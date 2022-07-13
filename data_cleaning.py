@@ -47,7 +47,7 @@ if __name__ == '__main__':
     start_time = time.time()
     #%% ========== LOAD DATA ========== %%# 
     #first pull raw data
-    df= loadData('CAC+2022_Training+Data+Set+New.xlsx')
+    df= loadData('./provided_data/CAC+2022_Training+Data+Set+New.xlsx')
     
     #%% ========== Checking which fields to remove ========== %%# 
     print(list(df))
@@ -67,5 +67,6 @@ if __name__ == '__main__':
 
     #%% ========== Cleaning data and removing cols ========== %%# 
     c_df= cleanData(df) #see report for rationale
+    c_df.to_excel('./cleaned_data/clean_training_data.xlsx', index= False)  
     
     print("\n--- %s seconds ---" % (time.time() - start_time))
