@@ -1,3 +1,7 @@
+# User added
+*.spydata
+*.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
